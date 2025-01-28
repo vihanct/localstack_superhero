@@ -30,11 +30,8 @@ public class SuperheroConsumer {
               .build());
 
       receiveMessageResponse.messages().forEach(message -> {
-        // Process the message
         String body = message.body();
         System.out.println("Received message: " + body);
-
-        // Check if the message contains "vihan" and update it
         if (body.contains("vihanagarwal")) {
           body = body.replace("vihanagarwal", "vihanagarwal updated");
           System.out.println("Updated message: " + body);
@@ -44,16 +41,13 @@ public class SuperheroConsumer {
               superhero.setName("vihanagarwal updated");
               superheroRepository.save(superhero);
             }
-            System.out.println("Superhero name(s) updated in the database.");
+            System.out.println("Superhero name updated in the database.");
           } else {
             System.out.println("Superhero with name 'vihan' not found in the database.");
           }
         } else {
-          // Print the original message if it does not contain "vihan"
           System.out.println("Original message: " + body);
         }
-
-        // Delete the message after processing
         sqsClient.deleteMessage(DeleteMessageRequest.builder()
                 .queueUrl(sqsConfig.getQueueUrl())
                 .receiptHandle(message.receiptHandle())

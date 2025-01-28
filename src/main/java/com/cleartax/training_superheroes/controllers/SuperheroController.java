@@ -58,15 +58,14 @@ public class SuperheroController {
         return superheroService.persistSuperhero(superheroRequestBody, superheroRequestBody.getUniverse());
     }
 
-    @PostMapping("/push_all_superheroes")
-    public String pushAllSuperheroes() {
+    @PostMapping("/pushsuperheroes")
+    public String pushSuperheroes() {
         superheroService.pushAllSuperheroesToQueue(sqsConfig.getQueueUrl());
         return "All superheroes have been pushed to the queue.";
     }
 
-
-    @GetMapping("/get_all_messages")
-    public List<String> getAllMessages() {
+    @GetMapping("/getfromqueue")
+    public List<String> getmessagesofqueue() {
         return queueService.getAllMessagesInQueue();
     }
 }
