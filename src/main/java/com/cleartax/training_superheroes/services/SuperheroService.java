@@ -1,5 +1,6 @@
 package com.cleartax.training_superheroes.services;
 
+import com.cleartax.training_superheroes.config.SqsConfig;
 import com.cleartax.training_superheroes.entities.Superhero;
 import com.cleartax.training_superheroes.dto.SuperheroRequestBody;
 import com.cleartax.training_superheroes.repos.SuperheroRepository;
@@ -7,6 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.services.sqs.SqsClient;
 import software.amazon.awssdk.services.sqs.model.SendMessageRequest;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.util.List;
 
@@ -15,6 +18,10 @@ public class SuperheroService {
 
     private SuperheroRepository superheroRepository;
     private SqsClient sqsClient;
+    private final ObjectMapper objectMapper = new ObjectMapper();
+
+    @Autowired
+    private SqsConfig sqsConfig;
 
     @Autowired
     public SuperheroService(SuperheroRepository superheroRepository, SqsClient sqsClient) {
@@ -44,15 +51,20 @@ public class SuperheroService {
         }
     }
 
-    public void pushAllSuperheroesToQueue(String queueUrl) {
+    public void pushAllSuperheroesToQueue() {
         List<Superhero> superheroes = superheroRepository.findAll();
         for (Superhero superhero : superheroes) {
-            String messageBody = superhero.getName() + "," + superhero.getPower() + "," + superhero.getUniverse();
-            SendMessageRequest sendMessageRequest = SendMessageRequest.builder()
-                    .queueUrl(queueUrl)
-                    .messageBody(messageBody)
-                    .build();
-            sqsClient.sendMessage(sendMessageRequest);
+            try {
+                String messageBody = objectMapper.writeValueAsString(superhero);
+                SendMessageRequest sendMessageRequest = SendMessageRequest.builder()
+                        .queueUrl(sqsConfig.getQueueUrl())
+                        .messageBody(messageBody)
+                        .build();
+                sqsClient.sendMessage(sendMessageRequest);
+                System.out.println("Message ready to be processed: " + messageBody);
+            } catch (JsonProcessingException e) {
+                System.err.println("Error serializing superhero: " + e.getMessage());
+            }
         }
     }
 }

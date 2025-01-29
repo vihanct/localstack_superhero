@@ -60,8 +60,10 @@ public class SuperheroController {
 
     @PostMapping("/pushsuperheroes")
     public String pushSuperheroes() {
-        superheroService.pushAllSuperheroesToQueue(sqsConfig.getQueueUrl());
-        return "All superheroes have been pushed to the queue.";
+        superheroService.pushAllSuperheroesToQueue();
+        return "All superheroes have been prepared for processing.";
+        //superheroService.pushAllSuperheroesToQueue(sqsConfig.getQueueUrl());
+//        return "All superheroes have been pushed to the queue.";
     }
 
     @GetMapping("/getfromqueue")
